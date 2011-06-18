@@ -1,6 +1,7 @@
 Capistrano::Configuration.instance.load do
   namespace :git do
 
+    desc "apply git tag based on currently deployed stage and a timestamp. Clears out old tags"
     task :tag, :except => { :no_release => true } do
       new_tag = "#{stage}_#{Time.now.strftime("%Y%m%d%H%M%S")}"
       cmd = [
@@ -11,13 +12,6 @@ Capistrano::Configuration.instance.load do
       ].join(";")
       puts "Executing: #{cmd}"
       `#{cmd}`
-    end
-
-    task :change_log do
-      last_commit_tag = `git tag -l '#{stage}*'`.split("\n").last
-      cmd = "git log --format=oneline --abbrev-commit #{last_commit_tag}..#{branch}"
-      commit_log = `#{cmd}`
-      Notifier.deliver_deploy_notification("Deployed #{branch} to #{stage}: commit log", commit_log)
     end
 
   end
